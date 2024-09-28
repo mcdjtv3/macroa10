@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz : Démarche Marketing & Définition des Marchés</title>
+    <style>
+        body {
+            font-family: 'Mayan', sans-serif;
+            margin: 0;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #333;
+            text-align: center;
+        }
+        .quiz-container, .summary {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            background-image: url('images/back.jpg.webp');
+            background-size: cover;
+            background-position: center;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #000;
+        }
+        .choices {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-left: 20%;
+        }
+        .choices li {
+            margin: 8px 0;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #FF0000;
+            color: white;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #CC0000;
+        }
+        .summary {
+            display: none;
+        }
+        .summary ul {
+            list-style: none;
+            padding: 0;
+        }
+        .summary li {
+            text-align: left;
+            margin-left: 20%;
+            margin-bottom: 10px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .quiz-container, .summary {
+                max-width: 90%;
+                margin: 20px auto;
+                padding: 15px;
+                border-radius: 10px;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            .quiz-container, .summary {
+                padding: 10px;
+                margin: 10px;
+                border-radius: 10px;
+            }
+            .question {
+                font-size: 16px;
+            }
+            button {
+                font-size: 12px;
+                padding: 6px 12px;
+                border-radius: 10px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .quiz-container, .summary {
+                max-width: 800px;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="quiz-container" id="quiz-container">
+    <h2>Quiz : Cycle Opérationnel et Gestion des Stocks</h2>
+    <div id="question-container">
+        <!-- Les questions seront affichées ici dynamiquement -->
+    </div>
+    <button id="next-button" onclick="nextQuestion()">Suivant</button>
+</div>
+
+<div class="summary" id="summary">
+    <h3>Récapitulatif</h3>
+    <ul id="summary-list">
+        <!-- Le récapitulatif des réponses sera affiché ici -->
+    </ul>
+    <div class="score" id="score"></div>
+    <button onclick="restartQuiz()">Recommencer</button>
+</div>
+
+<script>
+    const quizData = [
+        { question: "Dorian paye un abonnement pour 6 mois à 120 € en novembre N. Combien devra-t-il comptabiliser en charges constatées d’avance au 31 décembre N ?", choices: ["40 €", "20 €", "60 €", "80 €"], correct: 2 },
+        { question: "Joséphine reçoit un paiement de 900 € pour un service de 3 mois en décembre N. Combien devra-t-elle comptabiliser en produits constatés d’avance pour l’année N ?", choices: ["300 €", "600 €", "900 €", "450 €"], correct: 1 },
+        { question: "Dorian reçoit une facture de 400 € pour des services rendus en décembre N, mais il paiera en janvier N+1. Comment doit-il comptabiliser cette charge à payer au 31 décembre N ?", choices: ["400 € en charges à payer", "400 € en charges constatées d’avance", "400 € en produits constatés d’avance", "200 € en charges à payer"], correct: 0 },
+        { question: "Joséphine encaisse 600 € pour un service annuel à partir de mars N. Combien de produits devra-t-elle constater pour l'année N ?", choices: ["600 €", "500 €", "450 €", "200 €"], correct: 1 },
+        { question: "Dorian a livré un service en décembre N mais n'a pas encore reçu le paiement. Comment doit-il enregistrer cette transaction au 31 décembre N ?", choices: ["Produit à recevoir", "Charge constatée d’avance", "Produit encaissé", "Charge à payer"], correct: 0 },
+        { question: "Joséphine envoie une facture de 500 € en janvier N+1 pour un service réalisé en décembre N. Comment doit-elle ajuster ses comptes pour l'année N ?", choices: ["Produits à recevoir de 500 €", "Produits constatés d’avance de 500 €", "Produits encaissés de 500 €", "Charges à payer de 500 €"], correct: 0 },
+        { question: "Dorian doit payer une facture de 300 € pour des fournitures reçues en décembre N, mais il effectuera le paiement en janvier N+1. Quelle écriture doit-il passer au 31 décembre N ?", choices: ["300 € en charges à payer", "300 € en charges constatées d’avance", "150 € en charges à payer", "300 € en produits à recevoir"], correct: 0 },
+        { question: "Joséphine a payé 1 200 € pour une assurance couvrant les mois de décembre N à mai N+1. Combien devra-t-elle comptabiliser en charges constatées d’avance au 31 décembre N ?", choices: ["1 000 €", "600 €", "800 €", "400 €"], correct: 0 },
+        { question: "Dorian envoie une facture de 400 € le 1er mars N+1 pour un service rendu en janvier et février N+1. Comment doit-il comptabiliser cette opération pour l’année N+1 ?", choices: ["Produits constatés d’avance", "Produits encaissés", "Produits à recevoir", "Charges à payer"], correct: 2 },
+        { question: "Joséphine a un abonnement annuel de 240 €, payé en janvier N, couvrant toute l'année. Quelle est la charge constatée d’avance au 30 juin N ?", choices: ["120 €", "60 €", "180 €", "240 €"], correct: 0 },
+        { question: "Dorian vend un service pour 600 € en décembre N, mais reçoit le paiement en janvier N+1. Comment doit-il ajuster ses comptes au 31 décembre N ?", choices: ["Enregistrer 600 € en produits à recevoir", "Enregistrer 600 € en produits constatés d’avance", "Enregistrer 600 € en charges à payer", "Enregistrer 600 € en produits encaissés"], correct: 0 },
+        { question: "Joséphine a livré des marchandises pour 2 000 € en décembre N, mais son client paiera en janvier N+1. Quel montant doit-elle inscrire dans ses créances au 31 décembre N ?", choices: ["1 500 €", "2 000 €", "500 €", "1 000 €"], correct: 1 },
+        { question: "Dorian a un abonnement de 360 € pour un service sur 12 mois, payé en décembre N. Combien devra-t-il inscrire en charges constatées d’avance pour l’année N+1 ?", choices: ["120 €", "240 €", "180 €", "90 €"], correct: 1 },
+        { question: "Joséphine a fourni un service pour 500 € en novembre N, mais le paiement est prévu pour février N+1. Comment doit-elle comptabiliser cette créance en fin d'année N ?", choices: ["500 € en produits encaissés", "500 € en charges à payer", "500 € en produits à recevoir", "500 € en charges constatées d’avance"], correct: 2 },
+        { question: "Dorian paye 900 € pour une prestation couvrant novembre N à février N+1. Combien devra-t-il comptabiliser en charges constatées d’avance pour l'année N+1 ?", choices: ["300 €", "450 €", "600 €", "200 €"], correct: 0 }
+    ];
+
+    let currentQuestionIndex = 0;
+    let selectedAnswers = [];
+
+    function loadQuestion() {
+        const container = document.getElementById('question-container');
+        container.innerHTML = '';
+
+        const questionData = quizData[currentQuestionIndex];
+        const questionElem = document.createElement('div');
+        questionElem.className = 'question';
+        questionElem.textContent = questionData.question;
+
+        const choicesElem = document.createElement('ul');
+        choicesElem.className = 'choices';
+
+        questionData.choices.forEach((choice, index) => {
+            const choiceElem = document.createElement('li');
+            const choiceInput = document.createElement('input');
+            choiceInput.type = 'radio';
+            choiceInput.name = 'choice';
+            choiceInput.value = index;
+            choiceInput.id = `choice${index}`;
+            
+            const choiceLabel = document.createElement('label');
+            choiceLabel.htmlFor = `choice${index}`;
+            choiceLabel.textContent = choice;
+
+            choiceElem.appendChild(choiceInput);
+            choiceElem.appendChild(choiceLabel);
+            choicesElem.appendChild(choiceElem);
+        });
+
+        container.appendChild(questionElem);
+        container.appendChild(choicesElem);
+    }
+
+    function nextQuestion() {
+        const selectedChoice = document.querySelector('input[name="choice"]:checked');
+        if (!selectedChoice) {
+            alert("Veuillez sélectionner une réponse !");
+            return;
+        }
+
+        selectedAnswers.push(parseInt(selectedChoice.value));
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showSummary();
+        }
+    }
+
+    function showSummary() {
+        document.getElementById('quiz-container').style.display = 'none';
+        const summary = document.getElementById('summary');
+        summary.style.display = 'block';
+
+        const summaryList = document.getElementById('summary-list');
+        summaryList.innerHTML = '';
+
+        let correctAnswers = 0;
+
+        quizData.forEach((q, index) => {
+            const summaryItem = document.createElement('li');
+            summaryItem.innerHTML = `
+                <strong>${q.question}</strong><br>
+                <div style="text-align: left; margin-left: 20%;">
+                    Votre réponse: ${q.choices[selectedAnswers[index]]} - 
+                    ${selectedAnswers[index] === q.correct ? '<span class="correct">Correct</span>' : '<span class="incorrect">Incorrect</span>'}<br>
+                    Bonne réponse: ${q.choices[q.correct]}
+                </div>
+            `;
+            summaryList.appendChild(summaryItem);
+            if (selectedAnswers[index] === q.correct) {
+                correctAnswers++;
+            }
+        });
+
+        document.getElementById('score').textContent = `Score: ${correctAnswers} / ${quizData.length}`;
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        selectedAnswers = [];
+        document.getElementById('summary').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+
+
+</html>
